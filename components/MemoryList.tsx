@@ -8,8 +8,9 @@ interface MemoryItem {
   id: string;
   title: string;
   body: string;
-  imagePath: string;
+  images: { path: string }[];
   createdAt: string;
+  favorite: boolean;
 }
 
 export default function MemoryList() {

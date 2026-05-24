@@ -15,6 +15,7 @@ model User {
   createdAt      DateTime  @default(now())
   sessions       Session[]
   memories       Memory[]
+  albums         Album[]
 }
 
 model Session {
@@ -29,8 +30,29 @@ model Memory {
   id         String   @id @default(cuid())
   title      String
   body       String
-  imagePath  String
+  favorite   Boolean  @default(false)
+  album      Album?   @relation(fields: [albumId], references: [id])
+  albumId    String?
+  images     MemoryImage[]
   createdAt  DateTime @default(now())
   user       User     @relation(fields: [userId], references: [id])
   userId     String
+}
+
+model MemoryImage {
+  id        String   @id @default(cuid())
+  memory    Memory   @relation(fields: [memoryId], references: [id])
+  memoryId  String
+  path      String
+  ord       Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Album {
+  id        String   @id @default(cuid())
+  name      String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  memories  Memory[]
+  createdAt DateTime @default(now())
 }

@@ -23,6 +23,7 @@ export async function GET() {
   const memories = await prisma.memory.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: 'desc' },
+    include: { images: { orderBy: { ord: 'asc' } } },
   });
 
   return NextResponse.json(memories);
@@ -38,25 +39,34 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const title = String(formData.get('title') ?? '').trim();
   const body = String(formData.get('body') ?? '').trim();
-  const file = formData.get('image');
+  const files = formData.getAll('images');
 
-  if (!title || !body || !file || !(file instanceof File)) {
-    return NextResponse.json({ message: 'Title, note, and image are required' }, { status: 400 });
+  if (!title || !body || files.length === 0) {
+    return NextResponse.json({ message: 'Title, note, and at least one image are required' }, { status: 400 });
   }
 
-  const fileName = `${Date.now()}-${cryptoRandomString(8)}-${file.name.replace(/\s+/g, '-')}`;
-  const filePath = path.join(uploadDir, fileName);
-  const fileBytes = Buffer.from(await file.arrayBuffer());
+  const savedFiles: { path: string; ord: number }[] = [];
 
-  await fs.writeFile(filePath, fileBytes);
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
+    if (!(f instanceof File)) continue;
+    const fileName = `${Date.now()}-${cryptoRandomString(8)}-${f.name.replace(/\s+/g, '-')}`;
+    const filePath = path.join(uploadDir, fileName);
+    const fileBytes = Buffer.from(await f.arrayBuffer());
+    await fs.writeFile(filePath, fileBytes);
+    savedFiles.push({ path: `/uploads/${fileName}`, ord: i });
+  }
 
   const memory = await prisma.memory.create({
     data: {
       title,
       body,
-      imagePath: `/uploads/${fileName}`,
       userId: user.id,
+      images: {
+        create: savedFiles.map((s) => ({ path: s.path, ord: s.ord })),
+      },
     },
+    include: { images: true },
   });
 
   return NextResponse.json(memory, { status: 201 });

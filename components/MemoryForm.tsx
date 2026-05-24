@@ -6,32 +6,32 @@ import { useRouter } from 'next/navigation';
 export default function MemoryForm() {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState('');
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
     setError('');
-    const file = event.target.files?.[0] ?? null;
-    setImageFile(file);
-    setPreview(file ? URL.createObjectURL(file) : '');
+    const files = Array.from(event.target.files ?? [] as File[]);
+    setImageFiles(files);
+    setPreviews(files.map((f) => URL.createObjectURL(f)));
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
 
-    if (!title.trim() || !body.trim() || !imageFile) {
-      setError('Please provide a title, a note, and an image.');
+    if (!title.trim() || !body.trim() || imageFiles.length === 0) {
+      setError('Please provide a title, a note, and at least one image.');
       return;
     }
 
     const formData = new FormData();
     formData.append('title', title);
     formData.append('body', body);
-    formData.append('image', imageFile);
+    imageFiles.forEach((f) => formData.append('images', f));
 
     setIsLoading(true);
     const response = await fetch('/api/memories', {
@@ -67,10 +67,11 @@ export default function MemoryForm() {
           />
         </label>
         <label className="block text-sm font-medium text-slate-700">
-          Image
+          Images
           <input
             type="file"
             accept="image/*"
+            multiple
             onChange={handleImageChange}
             required
             className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900"
@@ -78,9 +79,13 @@ export default function MemoryForm() {
         </label>
       </div>
 
-      {preview ? (
-        <div className="rounded-3xl overflow-hidden border border-slate-200">
-          <img src={preview} alt="Memory preview" className="h-64 w-full object-cover" />
+      {previews.length > 0 ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {previews.map((p, i) => (
+            <div key={i} className="overflow-hidden rounded-2xl border border-slate-200">
+              <img src={p} alt={`Preview ${i + 1}`} className="h-32 w-full object-cover" />
+            </div>
+          ))}
         </div>
       ) : null}
 
