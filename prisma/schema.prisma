@@ -44,6 +44,7 @@ model MemoryImage {
   memory    Memory   @relation(fields: [memoryId], references: [id])
   memoryId  String
   path      String
+  caption   String?
   ord       Int      @default(0)
   createdAt DateTime @default(now())
 }

@@ -8,6 +8,7 @@ export default function MemoryForm() {
   const [body, setBody] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [album, setAlbum] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -31,6 +32,7 @@ export default function MemoryForm() {
     const formData = new FormData();
     formData.append('title', title);
     formData.append('body', body);
+    if (album.trim()) formData.append('albumName', album.trim());
     imageFiles.forEach((f) => formData.append('images', f));
 
     setIsLoading(true);
@@ -88,6 +90,16 @@ export default function MemoryForm() {
           ))}
         </div>
       ) : null}
+
+      <label className="block text-sm font-medium text-slate-700">
+        Album (optional)
+        <input
+          value={album}
+          onChange={(e) => setAlbum(e.target.value)}
+          placeholder="Create or enter album name"
+          className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+        />
+      </label>
 
       <label className="block text-sm font-medium text-slate-700">
         Note
