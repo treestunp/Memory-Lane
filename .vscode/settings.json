@@ -1,0 +1,20 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^cd \"c:\\\\Users\\\\irham\\\\Memory Lane\" ; npm install$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cd \"c:\\\\Users\\\\irham\\\\Memory Lane\" ; npx prisma generate ; npx prisma db push$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cd \"c:\\\\Users\\\\irham\\\\Memory Lane\" ; \\.\\\\node_modules\\\\\\.bin\\\\prisma\\.cmd generate ; \\.\\\\node_modules\\\\\\.bin\\\\prisma\\.cmd db push$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cd \"c:\\\\Users\\\\irham\\\\Memory Lane\" ; npm install --save-dev @types/bcryptjs$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
